@@ -265,12 +265,16 @@ the findings.
 ### Findings
 
 Ranked from highest to lowest level. One block per finding, all fields
-mandatory except **Sugestão**:
+mandatory except **Sugestão**. Findings are **numbered sequentially** (1, 2,
+3...) in the order they appear, and each heading starts with the severity icon
+(🔴 Alto, 🟡 Médio, 🟢 Baixo — see the levels table). The numbering is global
+across levels (do not restart per level), so the reader can reference a
+finding as "problema #3".
 
 ````markdown
-### <short title>
+### <icon> #<N> — <short title>
 
-**Nível:** Alto | Médio | Baixo
+**Nível:** 🔴 Alto | 🟡 Médio | 🟢 Baixo
 **Arquivo e linha:** `path/to/file.ts:123` (or `:123-130`)
 **Por quê:** the rule, spec criterion (cite CA / section of the spec) or
 principle being violated — one line.
@@ -303,17 +307,28 @@ Rules for the fields:
 
 Levels:
 
-| Nível | Meaning |
-|---|---|
-| Alto | Bug, security hole, data-loss risk, or business-rule/CA violation — blocks merge |
-| Médio | Should be fixed or explicitly justified before merge (regression risk, missing test for a CA, perf, convention violation) |
-| Baixo | Non-blocking improvement or style suggestion |
+| Ícone | Nível | Meaning |
+|---|---|---|
+| 🔴 | Alto | Bug, security hole, data-loss risk, or business-rule/CA violation — blocks merge |
+| 🟡 | Médio | Should be fixed or explicitly justified before merge (regression risk, missing test for a CA, perf, convention violation) |
+| 🟢 | Baixo | Non-blocking improvement or style suggestion |
+
+Right before the findings, add a short numbered index so the reader can scan
+everything at a glance:
+
+```markdown
+## Índice de problemas
+
+1. 🔴 <short title> — `path/file.ts:123`
+2. 🟡 <short title> — `path/file.ts:45`
+3. 🟢 <short title> — `path/file.ts:9`
+```
 
 ### Closing
 
 ```markdown
 ---
-**Resumo:** N alto, N médio, N baixo.
+**Resumo:** 🔴 N alto · 🟡 N médio · 🟢 N baixo.
 **Cobertura da spec (Nexus):** CAs atendidos / divergentes / não encontrados no diff (only for Nexus with spec)
 **Veredito:** Aprovar | Aprovar com ressalvas | Solicitar mudanças — one-sentence justification.
 ```
@@ -348,8 +363,8 @@ still give a verdict (Aprovar) — never omit the verdict line.
 4. Load rules.md + discover repo-specific conventions (§2.4)
 5. Nexus only: task number from branch → find spec in nexus-analysis → read CAs/business rules (§2.5)
 6. Analyze all commits + full diff against the checklist (+ spec for Nexus)
-7. Write the change summary, then rank findings Alto/Médio/Baixo using the structured block (§4)
-8. Emit header + change summary + findings + closing summary + verdict
+7. Write the change summary, then rank findings 🔴 Alto / 🟡 Médio / 🟢 Baixo, numbered sequentially, using the structured block (§4)
+8. Emit header + change summary + numbered index + findings + closing summary + verdict
 ```
 
 ---
