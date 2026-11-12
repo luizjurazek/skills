@@ -41,7 +41,9 @@ Rodar os comandos a partir do clone local do nexus (cwd) ou usar sempre `--repo 
 
 ## 3. Descrição (skill mr-message)
 
-Antes de criar a MR, **invocar a skill `mr-message`** com a branch informada (e dependências, se houver) e usar o markdown gerado como descrição, sem reescrever.
+Antes de criar a MR, **invocar a skill `mr-message`** com a branch informada (e dependências, se houver) e usar o markdown gerado como descrição.
+
+**Aprovação obrigatória:** depois de gerar a descrição, **mostre o texto completo ao usuário no chat e pare**, aguardando aprovação ou edição. Só siga para a seção 4 (criar a MR) depois de um OK explícito. Se o usuário pedir ajustes, aplique, mostre a versão nova e peça aprovação de novo. A descrição aprovada (com as edições dele) é a que vai para o `glab`. Nunca crie a MR sem essa confirmação.
 
 - A mr-message coleta o diff contra `origin/develop` no repo local. Se o cwd não for o clone do nexus ou a branch não estiver checada, rode a coleta com a branch explícita (`git log origin/develop..origin/<branch>`, `git diff --stat origin/develop...origin/<branch>`) em vez de depender do HEAD.
 - Se a mr-message precisar perguntar algo (dependência, working tree sujo, número da tarefa), repasse a pergunta ao usuário antes de abrir a MR.
@@ -49,6 +51,8 @@ Antes de criar a MR, **invocar a skill `mr-message`** com a branch informada (e 
 - Não copiar para o clipboard (ignorar a etapa 4 da mr-message); gravar o texto em arquivo no scratchpad da sessão para passar ao `glab`.
 
 ## 4. Criar a MR
+
+Só execute após a aprovação da descrição (seção 3).
 
 ```bash
 glab mr create \
