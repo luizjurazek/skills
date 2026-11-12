@@ -7,9 +7,12 @@ description: >-
   Applies a baked-in, framework-agnostic code-quality checklist (rules.md)
   plus any repo-specific conventions discovered in the target repo (CLAUDE.md,
   .cursor/rules, styleguide docs, CONTRIBUTING.md, linter configs). Produces a
-  concise English, severity-tagged findings report with a final verdict. Use
-  when the user asks to review a PR, review a MR, review a branch, paste a
-  github.com or gitlab.com pull/merge request URL, or asks to compare a
+  structured, severity-tagged findings report (pt-BR) with a final verdict.
+  Nexus MRs (git.copasul.coop.br/copasul/nexus) are additionally checked
+  against the matching spec and business rules in the nexus-analysis repo.
+  Use when the user asks to review a PR, review a MR, review a branch, paste a
+  github.com or gitlab.com pull/merge request URL, a
+  git.copasul.coop.br/copasul/nexus MR/branch URL, or asks to compare a
   branch against its base.
 disable-model-invocation: true
 ---
@@ -17,8 +20,9 @@ disable-model-invocation: true
 # Pull Request / Merge Request Review
 
 Technical review of a GitHub PR or GitLab MR: commits, full diff, rule
-compliance, severity-tagged findings, and an explicit verdict. All output in
-English.
+compliance, severity-tagged findings, and an explicit verdict. The report is
+written in Brazilian Portuguese (pt-BR) using the fixed structure in §4; code
+comments or snippets suggested in it stay in English.
 
 ---
 
@@ -32,6 +36,8 @@ Accept any of these:
 | GitHub branch/tree URL | `https://github.com/org/repo/tree/feature/xyz` |
 | GitLab MR URL (gitlab.com) | `https://gitlab.com/group/project/-/merge_requests/45` |
 | GitLab MR URL (self-managed) | `https://gitlab.company.com/group/subgroup/project/-/merge_requests/45` |
+| **Nexus** MR URL | `https://git.copasul.coop.br/copasul/nexus/-/merge_requests/45` |
+| **Nexus** branch URL | `https://git.copasul.coop.br/copasul/nexus/-/tree/feat/99961-slug` |
 | Local/remote branch name | `feature/xyz` |
 | Implicit PR/MR | "review my current branch", "review this PR" |
 
@@ -47,6 +53,11 @@ was given), `head branch`, `base branch`.
   the provider from the remote URL.
 - Still ambiguous → ask the user, or fall back to the local-git-only path
   (§2.2/§2.3 priority 3), which doesn't need to know the provider.
+
+**Nexus detection:** the target is a Nexus review when the URL host/path is
+`git.copasul.coop.br/copasul/nexus`, or (branch-name-only input) the local
+`origin` remote points to that project. Nexus reviews run the extra spec step
+in §2.5.
 
 **Base branch:** prefer the value returned in the PR/MR metadata once
 fetched. If only a branch name was given and no metadata is available yet,
@@ -160,6 +171,41 @@ and branch names.
    in the output header (e.g. "Rules applied: rules.md (baked-in); no
    repo-specific conventions found").
 
+### 2.5 Nexus only — spec & business rules (nexus-analysis)
+
+Skip this section for non-Nexus targets.
+
+1. **Extract the task number** from the head branch name (e.g.
+   `feat/99961-some-slug` → `99961`). If the input was an MR URL, take the
+   branch name from the MR metadata. If there is no number in the branch,
+   try the MR title/description (Eureka link) before giving up.
+2. **Locate the spec** in the local `nexus-analysis` repo
+   (`/home/jurazek/Documents/repositories/nexus-analysis`; if the path
+   doesn't exist, ask the user for it). Specs live at
+   `<area>/<analysis-id>-<slug>/3-specs/<task-id>-<slug>.md`, and many only
+   exist on `docs/<id>-*` branches, so search in this order:
+   1. Working tree: `find . -path ./.git -prune -o -name '<task-id>-*' -path '*3-specs*' -print`
+   2. Other branches (no checkout, read-only):
+      `git branch -a | grep <task-id>`, then
+      `git ls-tree -r --name-only <branch> | grep '3-specs/<task-id>-'` and
+      `git show <branch>:<path>`
+   3. Parent analysis: if the number is the analysis id rather than the story
+      id, read the `3-specs/` folder and `*.requirements.md` of that analysis
+      and pick the spec(s) matching the MR scope.
+   Never `git checkout`/`switch` in nexus-analysis — use `git show`.
+3. **Read the spec fully**: acceptance criteria (CA), business rules,
+   formulas, edge cases, API contract, permissions. Also read the sibling
+   `*.requirements.md` when a rule references it.
+4. **Business-rule conformance** becomes part of the review: for each CA/rule,
+   check the diff implements it; report deviations, missing CAs, behavior the
+   spec doesn't ask for, and contradictions between spec and code. Business-rule
+   violations are rated by user/data impact (§4 levels), not by code style.
+5. **No spec found** → say so in the header ("Spec: not found — searched
+   working tree and branches for `<task-id>`") and continue with the generic
+   review. Never invent spec content.
+6. Also load the Nexus repo conventions per §2.4 (`CLAUDE.md`,
+   `.cursor/rules/*.mdc`, `.claude/`, `AGENTS.md`) from the head ref.
+
 ---
 
 ## 3. Analysis Checklist
@@ -170,6 +216,8 @@ and branch names.
 - Before flagging something, read adjacent files and existing patterns in the
   module — distinguish a real defect from an already-established repo
   convention.
+- Nexus: also trace every acceptance criterion / business rule of the spec to
+  the diff (§2.5) and review tests against those criteria.
 - Flag mixed/unrelated scope, but don't propose refactors outside the PR/MR's
   stated scope unless there's direct correctness or security impact.
 
@@ -177,59 +225,90 @@ and branch names.
 
 ## 4. Output Format
 
+The report is always structured, in pt-BR, with the fields below. Do not add
+free-form prose findings outside this structure.
+
 ### Header
 
 ```markdown
 # Code Review — <repo/project> <PR #N | MR !N | branch>
 
-**Provider:** GitHub | GitLab
+**Provider:** GitHub | GitLab (Nexus)
 **Link:** <url>
 **Base → Head:** <base> ← <head>
-**Commits reviewed:** N
-**Files changed:** +X / −Y lines
-**Rules applied:** rules.md (baked-in) + <repo-specific files found, or "none found">
+**Commits revisados:** N
+**Arquivos alterados:** +X / −Y linhas
+**Regras aplicadas:** rules.md (baked-in) + <repo-specific files found, or "nenhuma encontrada">
+**Spec (Nexus):** <path/branch of the spec in nexus-analysis | "não encontrada" | "n/a">
 ```
 
 ### Findings
 
-For each finding, ranked most severe first:
+Ranked from highest to lowest level. One block per finding, all fields
+mandatory except **Sugestão**:
 
-```markdown
-### [Critical|Important|Minor]: <short title>
+````markdown
+### <short title>
 
-**Location:** `path/to/file.ts:123`
-**Issue:** one-sentence description of the defect.
-**Why it matters:** concrete failure scenario / impact.
-**Suggested fix:** concrete fix, with a code snippet if helpful.
+**Nível:** Alto | Médio | Baixo
+**Arquivo e linha:** `path/to/file.ts:123` (or `:123-130`)
+**Por quê:** the rule, spec criterion (cite CA / section of the spec) or
+principle being violated — one line.
+**Explicação básica:** 2–4 sentences, plain language: what happens, in which
+scenario, and the impact.
+
+**Onde está o problema:**
+```ts
+// real excerpt from the diff, with the problematic line(s) visible
 ```
 
-Severity:
+**Sugestão de melhoria:** (only when cheap — see below)
+```ts
+// proposed code
+```
+````
 
-| Level | Meaning |
+Rules for the fields:
+
+- **Arquivo e linha** must come from the real diff/file read; never guess.
+- **Onde está o problema** must be a real excerpt (trim to the relevant
+  lines, keep enough context to be recognizable).
+- **Sugestão de melhoria**: include it whenever the fix is local and obvious
+  (a few lines, no cross-file investigation). If a good fix would require
+  heavy analysis (broad refactor, multiple files, design decision, extra
+  investigation), omit the field entirely — do not write a vague or
+  speculative suggestion.
+- For spec/business-rule findings, "Por quê" must quote or reference the
+  spec criterion and say how the code diverges.
+
+Levels:
+
+| Nível | Meaning |
 |---|---|
-| Critical | Bug, security hole, or data-loss risk — blocks merge |
-| Important | Should be fixed or explicitly justified before merge |
-| Minor | Non-blocking improvement or style suggestion |
+| Alto | Bug, security hole, data-loss risk, or business-rule/CA violation — blocks merge |
+| Médio | Should be fixed or explicitly justified before merge (regression risk, missing test for a CA, perf, convention violation) |
+| Baixo | Non-blocking improvement or style suggestion |
 
 ### Closing
 
 ```markdown
 ---
-**Summary:** N critical, N important, N minor findings.
-**Verdict:** Approve | Approve with comments | Request changes — one-sentence justification.
+**Resumo:** N alto, N médio, N baixo.
+**Cobertura da spec (Nexus):** CAs atendidos / divergentes / não encontrados no diff (only for Nexus with spec)
+**Veredito:** Aprovar | Aprovar com ressalvas | Solicitar mudanças — one-sentence justification.
 ```
 
-If there are no findings, state "No issues found" explicitly and still give
-a verdict (Approve) — never omit the verdict line.
+If there are no findings, state "Nenhum problema encontrado" explicitly and
+still give a verdict (Aprovar) — never omit the verdict line.
 
 ---
 
 ## 5. Conduct Rules
 
-- English only, professional and constructive tone — explain the *why*.
+- Report in pt-BR (code comments in suggested snippets stay in English), professional and constructive tone — explain the *why*.
 - Never review `node_modules/`, `dist/`, generated artifacts, or files
   containing secrets (e.g. `.env`).
-- Cite real code with fenced references: ` ```startLine:endLine:filepath ` `.
+- Cite real code in the **Onde está o problema** block; the line reference goes in **Arquivo e linha**.
 - Never invent findings or line numbers — only report what was actually read.
 - Don't propose out-of-scope refactors unless directly relevant to
   correctness or safety.
@@ -247,9 +326,10 @@ a verdict (Approve) — never omit the verdict line.
 2. Detect provider (URL host/path shape, or git remote)
 3. Fetch diff+metadata: MCP (GitKraken for GitHub / mcp-gitlab for GitLab) → CLI (gh/glab) → git fetch+diff
 4. Load rules.md + discover repo-specific conventions (§2.4)
-5. Analyze all commits + full diff against the checklist
-6. Rank findings by severity with location/issue/impact/fix
-7. Emit header + findings + summary verdict
+5. Nexus only: task number from branch → find spec in nexus-analysis → read CAs/business rules (§2.5)
+6. Analyze all commits + full diff against the checklist (+ spec for Nexus)
+7. Rank findings Alto/Médio/Baixo using the structured block (§4)
+8. Emit header + findings + summary + verdict
 ```
 
 ---
@@ -261,6 +341,8 @@ a verdict (Approve) — never omit the verdict line.
 **User:** `Review this MR: https://gitlab.com/group/project/-/merge_requests/45`
 
 **User:** `Review this MR: https://gitlab.company.com/group/subgroup/project/-/merge_requests/45`
+
+**User:** `Review this MR: https://git.copasul.coop.br/copasul/nexus/-/merge_requests/45` (Nexus → also checks the spec in nexus-analysis)
 
 **User:** `Review my current branch against main`
 
