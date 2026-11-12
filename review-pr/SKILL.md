@@ -242,6 +242,26 @@ free-form prose findings outside this structure.
 **Spec (Nexus):** <path/branch of the spec in nexus-analysis | "não encontrada" | "n/a">
 ```
 
+### Resumo do que foi feito
+
+Right after the header and before any finding, add a short summary so the
+reader has context to evaluate the findings:
+
+```markdown
+## Resumo da mudança
+
+**Objetivo:** 1–2 sentences — what the PR/MR/branch delivers and why (from
+title, description, commits and, for Nexus, the spec).
+**O que foi feito:** 3–6 bullets grouped by area (backend, frontend,
+migrations, tests, config...), each naming the main files/modules touched.
+**Fora do escopo / observações:** only if relevant (unrelated changes mixed
+in, stacked branch, partial delivery of the spec).
+```
+
+Base it on what was actually read in the diff and commits — never on the
+title alone. Keep it neutral (describe, don't judge); judgments belong in
+the findings.
+
 ### Findings
 
 Ranked from highest to lowest level. One block per finding, all fields
@@ -328,8 +348,8 @@ still give a verdict (Aprovar) — never omit the verdict line.
 4. Load rules.md + discover repo-specific conventions (§2.4)
 5. Nexus only: task number from branch → find spec in nexus-analysis → read CAs/business rules (§2.5)
 6. Analyze all commits + full diff against the checklist (+ spec for Nexus)
-7. Rank findings Alto/Médio/Baixo using the structured block (§4)
-8. Emit header + findings + summary + verdict
+7. Write the change summary, then rank findings Alto/Médio/Baixo using the structured block (§4)
+8. Emit header + change summary + findings + closing summary + verdict
 ```
 
 ---
