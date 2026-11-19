@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 # Abrir MR no Nexus
 
-Repositório fixo: `https://git.copasul.coop.br/copasul/nexus/` (path `copasul/nexus`).
+Repositório fixo: `https://git.copasul.coop.br/copasul/nexus/` (path `copasul/nexus`). No `glab`, sempre passe o host completo: `--repo git.copasul.coop.br/copasul/nexus`; só `copasul/nexus` resolve para o host padrão e retorna 404.
 Base fixa: **`develop`**. Nunca outra.
 
 ## 1. Entrada
@@ -35,9 +35,9 @@ Base fixa: **`develop`**. Nunca outra.
 
 1. `glab auth status --hostname git.copasul.coop.br` está logado.
 2. A branch existe no remoto: `git ls-remote --exit-code --heads origin <branch>`. Se não existir, avisar que falta `git push` e **encerrar**; não fazer push por conta própria.
-3. MR duplicada: `glab mr list --repo copasul/nexus --source-branch <branch> --target-branch develop` (ou API). Se já existir MR aberta, **não criar outra**: devolver o link existente.
+3. MR duplicada: `glab api "projects/copasul%2Fnexus/merge_requests?source_branch=<branch>&target_branch=develop&state=opened" --hostname git.copasul.coop.br` (retorna `[]` se não houver). Se já existir MR aberta, **não criar outra**: devolver o link existente.
 
-Rodar os comandos a partir do clone local do nexus (cwd) ou usar sempre `--repo copasul/nexus` / `-R` e a API, para não depender do cwd.
+Rodar os comandos a partir do clone local do nexus (cwd) ou usar sempre `--repo git.copasul.coop.br/copasul/nexus` e a API com `--hostname git.copasul.coop.br`, para não depender do cwd.
 
 ## 3. Descrição (skill mr-message)
 
@@ -56,7 +56,7 @@ Só execute após a aprovação da descrição (seção 3).
 
 ```bash
 glab mr create \
-  --repo copasul/nexus \
+  --repo git.copasul.coop.br/copasul/nexus \
   --source-branch "<branch>" \
   --target-branch develop \
   --title "<titulo>" \
