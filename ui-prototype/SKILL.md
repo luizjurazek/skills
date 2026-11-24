@@ -59,7 +59,7 @@ Depois de ler o contexto e **antes** de consultar UX ou escrever HTML, faça uma
 - **Mobile + desktop**: celular 375px em toda tela e visão desktop (1120px) nas telas que mudam de
   layout. Marque como Recomendado quando o projeto é responsivo/web.
 - **Só mobile**: só molduras de celular. Recomendado quando o projeto é app mobile-first ou nativo.
-- **Só desktop**: só molduras de navegador; a coluna de notas fica embaixo do frame.
+- **Só desktop**: só molduras de navegador; o frame e as notas ficam empilhados.
 
 **Onde salvar** — "Onde salvar o protótipo?":
 
@@ -101,12 +101,24 @@ descem para baixo — não troque esse grid por `auto`, que espreme as notas). E
 - **Tokens**: copie os valores do arquivo de tokens do projeto para o `:root` (claro) e para os dois
   blocos escuros (`@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` e
   `:root[data-theme="dark"]`). Mesma fonte do projeto (Google Fonts) com fallback.
+- **Fontes sem negrito falso**: carregue no link do Google Fonts **todos** os pesos usados (inclusive a
+  fonte mono, se o projeto tiver uma, ligada em `--mono`). Mantenha do template `font-synthesis: none`,
+  `b, strong` no peso "strong" do projeto e `code` em `var(--mono)`. Nunca deixe `<b>` cair no 700
+  padrão se esse peso não foi carregado: o navegador engrossa a letra e ela fica grosseira.
+- **Seletor de tema**: mantenha o seletor fixo Sistema / Claro / Escuro do template (põe
+  `data-theme` no `<html>`, lembra a escolha no `localStorage`). Só funciona se os dois blocos escuros
+  acima estiverem preenchidos; se o projeto não tiver tema escuro, remova o seletor.
+- **Botões sem quebra**: rótulos de botão em uma linha (`white-space: nowrap`); se não couber, aumente
+  o container ou empilhe os botões, em vez de deixar o texto quebrar dentro do botão.
 - **Dispositivos**: siga a escolha do passo 1b. Remova do template o que não for usado (`.desk*` em
   "só mobile"; `.phone`/tab bar de celular em "só desktop") em vez de deixar CSS morto.
 - **Uma seção por tela/task**: o frame escolhido (celular 375px e/ou desktop) com dados de exemplo **coerentes com as regras de
   negócio** (datas reais, semana certa, limites como janelas de N dias) + notas com:
   tag da task e RNs, título, 1 parágrafo, lista "RN/CA → como a tela atende", "Decisões de UX" e
-  "Em aberto". Em "mobile + desktop", inclua a visão desktop quando a tela muda de layout.
+  "Em aberto". Em "mobile + desktop", inclua a visão desktop quando a tela muda de layout, **dentro da
+  seção da própria tela** (`<figure class="desk-fig">` depois das `.notes`, ocupando a linha inteira),
+  nunca numa seção "Desktop" separada no fim. Siga os padrões desktop do projeto (ação principal no
+  cabeçalho, grids, colunas do formulário, sheet → diálogo) e registre cada adaptação nas notas.
 - **Interativo só no que ensina algo**: o check que atualiza o resumo, o seletor que habilita o
   botão. JS pequeno, sem libs.
 - Padrões que sempre valem (se o projeto não disser o contrário): alvo de toque ≥ 44px; estado nunca
