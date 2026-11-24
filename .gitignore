@@ -7,3 +7,6 @@ credentials/*
 *service-account*.json
 .venv/
 __pycache__/
+node_modules/
+# Node dependencies installed by skill scripts
+node_modules/

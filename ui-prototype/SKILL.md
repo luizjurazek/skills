@@ -12,8 +12,8 @@ description: >-
 
 # Protótipo de telas
 
-Fluxo: **preflight → contexto → dispositivos e onde salvar → consulta de UX → HTML agrupado → arquivo
-por tela → salvar e linkar → (publicar, só se pedido) → pendências**.
+Fluxo: **preflight → contexto → dispositivos e onde salvar → consulta de UX → HTML agrupado → PNG por
+tela → salvar e linkar → (publicar, só se pedido) → pendências**.
 O plugin `ui-ux-pro-max` é só **consulta** (estilos, UX, padrões por produto). Quem decide o visual
 é o design system do projeto; quem escreve as telas é você.
 
@@ -125,12 +125,15 @@ descem para baixo — não troque esse grid por `auto`, que espreme as notas). E
   nunca numa seção "Desktop" separada no fim. Siga os padrões desktop do projeto (ação principal no
   cabeçalho, grids, colunas do formulário, sheet → diálogo) e registre cada adaptação nas notas.
 - **Uma `<section class="spec">` por tela**, com `id` estável e `data-task="NN"` quando houver task
-  (ex.: `<section class="spec" id="hoje" data-task="04">`). É o que o passo 4 usa para gerar um arquivo
-  por tela. Cada tela precisa se sustentar sozinha: nada de depender de outra seção para fazer sentido.
-- **JS por seção e tolerante a ausência**: um bloco por tela que começa com
-  `var root = document.getElementById('<id>'); if (root) { ... }` e só busca elementos dentro de `root`.
-  No arquivo separado as outras seções não existem, e um `getElementById` nulo quebraria o script todo.
-  Frames clonados (`data-clone`) só podem apontar para um elemento da mesma seção.
+  (ex.: `<section class="spec" id="hoje" data-task="04">`). O passo 4 usa isso para nomear os PNGs.
+  Celulares ficam em `.phones` e cada desktop em `<figure class="desk-fig">` com `.desk` dentro: é o que
+  o script fotografa.
+- **Estado inicial já é o que a imagem deve mostrar**: o PNG captura a tela parada (sem clique). Se uma
+  tela demonstra algo que só aparece ao interagir (toast, item selecionado), deixe esse estado visível
+  ao carregar.
+- Um frame reaproveitado por várias telas (ex.: o desktop de Hoje por trás de um diálogo) vai num
+  `<template id="...-tpl">` e as seções usam `data-clone="...-tpl"`. Clone primeiro e só depois preencha
+  os slots (barra de abas, barra do topo), porque o template pode conter slots.
 - **Interativo só no que ensina algo**: o check que atualiza o resumo, o seletor que habilita o
   botão. JS pequeno, sem libs.
 - Padrões que sempre valem (se o projeto não disser o contrário): alvo de toque ≥ 44px; estado nunca
@@ -143,37 +146,43 @@ descem para baixo — não troque esse grid por `auto`, que espreme as notas). E
 Em qualquer destino: `<slug>.html` **autônomo** (com `<!doctype html>`, `<html lang>`, `<head>` com
 charset e viewport), para abrir direto no navegador. É o arquivo **agrupado** e a fonte da verdade.
 
-Depois, gere **um arquivo por tela** a partir dele, para quem for executar a task abrir só a tela dela:
+Depois, gere **um PNG por tela** a partir dele, para as notas e tasks mostrarem a tela direto (o
+Obsidian não exibe `.html`):
 
 ```bash
-python3 "$HOME/.claude/skills/ui-prototype/scripts/split-screens.py" <pasta>/<slug>.html
+bash "$HOME/.claude/skills/ui-prototype/scripts/ensure-screenshot.sh"   # 1ª vez: instala playwright-core
+node "$HOME/.claude/skills/ui-prototype/scripts/screens-to-png.mjs" <pasta>/<slug>.html [--theme light]
 ```
 
-Ele cria `<pasta>/<slug>/<NN>-<id>.html` (ou `<id>.html` sem `data-task`), com o mesmo CSS, ícones,
-seletor de tema e scripts, um link "← Todas as telas" e remove arquivos de telas que sumiram.
-**Nunca edite os arquivos separados**: edite o agrupado e rode o script de novo, a cada alteração.
+Ele usa o Chrome do sistema (não baixa navegador) e cria em `<pasta>/<slug>/`
+`<NN>-<id>-mobile.png` (a fileira de celulares) e `<NN>-<id>-desktop[-N].png` (cada frame desktop), em
+2x, tema escuro por padrão; e apaga PNGs de telas que sumiram. Abra 1 ou 2 PNGs (Read) para conferir
+se nada saiu cortado ou espremido. **Nunca edite os PNGs**: edite o HTML e rode o script de novo, a
+cada alteração. Sem Chrome/Node, entregue só o HTML e diga que as imagens ficaram pendentes.
 
 Abra o agrupado com `xdg-open <arquivo>` (Linux) / `open` (macOS) em background; se falhar, só informe
 o caminho.
 
-Destino **repositório** ou **outra pasta**: só os `.html` (agrupado + pasta por tela). Pare aqui e vá
-para o passo 6.
+Destino **repositório** ou **outra pasta**: o `.html` agrupado + a pasta de PNGs. Pare aqui e vá para
+o passo 6.
 
 Destino **Obsidian** (`~/Documents/repositories/obsidian/projects/<Projeto>/prototipos/`), além do `.html`:
 
 1. `<slug>.md` índice: o que é, link local `[<slug>.html](<slug>.html)`, link publicado (só se
    houver), data, e
-   **um `##` por tela** com a task linkada (`[[../tasks/<arquivo>|<título>]]`), o arquivo da tela
-   (`[Abrir só esta tela](<slug>/<NN>-<id>.html)`) e os bullets de decisão; no fim, `## A confirmar`
-   com checkboxes.
+   **um `##` por tela** com a task linkada (`[[../tasks/<arquivo>|<título>]]`), as imagens da tela
+   embutidas (celular primeiro, depois desktop) e os bullets de decisão; no fim, `## A confirmar` com
+   checkboxes. Embeds com caminho a partir da raiz do vault, que não colide com outros projetos:
+   `![[projects/<Projeto>/prototipos/<slug>/<NN>-<id>-mobile.png]]`.
 2. Em cada task coberta, adicione no topo de `## Referências` (não duplique se já existir):
-   `- [[../prototipos/<slug>#<heading>|Protótipo: <heading>]]` e
-   `- [Tela isolada: <heading>](../prototipos/<slug>/<NN>-<id>.html)`.
+   `- [[../prototipos/<slug>#<heading>|Protótipo: <heading>]]` e uma linha `- ![[...png]]` por imagem
+   da tela.
 3. Nota raiz do projeto: link para o índice na seção de navegação.
 4. Registre a pasta/decisão na nota do projeto em `_knowledge/projects/` (em inglês).
 
 Atualizando um protótipo existente: edite o mesmo `<slug>`, preserve headings e `id` já linkados e
-rode o `split-screens.py` de novo. Se a numeração das tasks mudar, atualize os `data-task` e os links.
+rode o `screens-to-png.mjs` de novo. Se a numeração das tasks mudar, atualize os `data-task` e os
+embeds (o nome do PNG muda junto).
 
 ## 5. Publicar (só se pedido)
 
@@ -188,6 +197,6 @@ Obsidian, adicione o link publicado nele.
 
 ## 6. Entregar
 
-Resposta curta: caminho do arquivo agrupado e da pasta com uma tela por arquivo (e o link, se publicou), o que cada tela mostra (1 linha), e as **decisões que precisam de ok** antes de
+Resposta curta: caminho do HTML agrupado e da pasta de PNGs (e o link, se publicou), o que cada tela mostra (1 linha), e as **decisões que precisam de ok** antes de
 virar código. Ofereça transformar os padrões aprovados em rule do projeto
 (`.claude/rules/ux-patterns.md`) — só crie se o usuário pedir.

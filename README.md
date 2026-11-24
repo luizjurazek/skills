@@ -26,7 +26,7 @@ cd ~/Documents/personal/skills
 | `review-nexus-pr` | Review de PR/MR do Nexus (só reporta, não altera arquivos) | `glab` (ou `gh` para GitHub) |
 | `review-pr` | Review de PR do GitHub / MR do GitLab com checklist próprio (`rules.md`) | MCP GitKraken ou `mcp-gitlab`; fallback `gh`/`glab`/git |
 | `sync-resultados` | Sincronizar resultados em planilha | ver `sync-resultados/README.md` |
-| `ui-prototype` | Protótipos de telas (HTML mobile + desktop) a partir do plano no Obsidian | plugin `ui-ux-pro-max`, `python3` |
+| `ui-prototype` | Protótipos de telas (HTML mobile + desktop) a partir do plano no Obsidian | plugin `ui-ux-pro-max`, `python3`; PNG por tela: `node` + Chrome |
 | `ui-design-system` | Auditar/estender os tokens e specs de componentes do projeto | plugin `ui-ux-pro-max`, `node` (validador) |
 | `ui-assets` | Ícones SVG, logo, mascote, favicon no estilo do projeto | plugin `ui-ux-pro-max`; IA opcional: `scripts/setup-ai.sh` + `GEMINI_API_KEY` em `ui-assets/.env` |
 | `ui-brand` | Voz, tom e guia de marca (salvo no Obsidian) e revisão de textos | plugin `ui-ux-pro-max` |
@@ -47,6 +47,6 @@ Uso, em qualquer projeto:
 
 ou só peça "gera o protótipo da tela X". A skill confere o plugin `ui-ux-pro-max` (instala se faltar),
 lê o design system do projeto e o plano no Obsidian, pergunta onde salvar (Obsidian em
-`projects/<Projeto>/prototipos/`, `docs/prototypes/` do repo ou outra pasta), gera o HTML autônomo (agrupado
-e um arquivo por tela, via `scripts/split-screens.py`) e abre no navegador. No Obsidian, também linka nas tasks. Só publica como Artifact se você pedir
+`projects/<Projeto>/prototipos/`, `docs/prototypes/` do repo ou outra pasta), gera o HTML autônomo (agrupado)
+e um PNG por tela (via `scripts/screens-to-png.mjs`, com o Chrome do sistema) para embutir nas notas, e abre no navegador. No Obsidian, também linka nas tasks. Só publica como Artifact se você pedir
 (`/ui-prototype ... publicar`).

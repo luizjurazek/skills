@@ -1,0 +1,9 @@
+{
+  "name": "ui-prototype-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Screenshot helper for the ui-prototype skill (renders each screen of a prototype to PNG).",
+  "dependencies": {
+    "playwright-core": "1.65.1"
+  }
+}
