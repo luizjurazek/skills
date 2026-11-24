@@ -1,0 +1,9 @@
+# Secrets and local environments (never commit)
+.env
+*.env
+!.env.example
+credentials/*
+!credentials/.gitkeep
+*service-account*.json
+.venv/
+__pycache__/
