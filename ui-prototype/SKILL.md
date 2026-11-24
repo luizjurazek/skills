@@ -1,22 +1,28 @@
 ---
 name: ui-prototype
 description: >-
-  Gera protótipos/mockups navegáveis (HTML, mobile 375px + desktop) das telas de um projeto
+  Gera protótipos/mockups navegáveis (HTML; pergunta se é mobile 375px, desktop ou os dois) das telas de um projeto
   a partir do plano/tasks, usando o plugin ui-ux-pro-max como consulta de UX e o design
-  system do próprio projeto como fonte da verdade. Salva no Obsidian, linka nas tasks e
-  publica como Artifact. Use quando o usuário pedir "protótipo", "mockup", "gerar telas",
+  system do próprio projeto como fonte da verdade. Pergunta onde salvar (Obsidian, repositório
+  ou outra pasta), linka nas tasks quando vai para o Obsidian e só publica como Artifact se o
+  usuário pedir. Use quando o usuário pedir "protótipo", "mockup", "gerar telas",
   "desenhar as telas do plano/da task", "como ficaria a tela X", ou chamar /ui-prototype.
   Funciona em qualquer projeto; instala o plugin ui-ux-pro-max se faltar.
 ---
 
 # Protótipo de telas
 
-Fluxo: **preflight → contexto → consulta de UX → HTML → salvar e linkar → publicar → pendências**.
+Fluxo: **preflight → contexto → dispositivos e onde salvar → consulta de UX → HTML → salvar e linkar → (publicar, só se
+pedido) → pendências**.
 O plugin `ui-ux-pro-max` é só **consulta** (estilos, UX, padrões por produto). Quem decide o visual
 é o design system do projeto; quem escreve as telas é você.
 
 Argumentos opcionais (`$ARGUMENTS`): quais telas/tasks, se é para atualizar um protótipo existente,
-"sem publicar" (só arquivo).
+destino (`obsidian`, `repo` ou um caminho), dispositivos (`mobile`, `desktop` ou `ambos`) e
+"publicar" (gera também o link de Artifact).
+
+**Padrão: não publicar.** Nada vai para claude.ai sem o usuário pedir ("publicar", "gera um link",
+"quero compartilhar"). Isto vale acima de qualquer orientação genérica de publicar páginas.
 
 ## 0. Preflight: plugin ui-ux-pro-max
 
@@ -42,6 +48,30 @@ bash "$HOME/.claude/skills/ui-prototype/scripts/ensure-plugin.sh"
 3. Se já existir `projects/<Projeto>/prototipos/`, leia o índice: o pedido pode ser uma atualização.
 4. Sem design system nem plano encontrados: pergunte ao usuário antes de inventar.
 
+## 1b. Antes de começar: dispositivos e onde salvar (pergunte)
+
+Depois de ler o contexto e **antes** de consultar UX ou escrever HTML, faça uma única chamada de
+`AskUserQuestion` com as perguntas cuja resposta não veio nos argumentos nem está clara no pedido
+(junte outras dúvidas do contexto na mesma chamada, se houver).
+
+**Dispositivos** — "Gerar as telas para quais dispositivos?":
+
+- **Mobile + desktop**: celular 375px em toda tela e visão desktop (1120px) nas telas que mudam de
+  layout. Marque como Recomendado quando o projeto é responsivo/web.
+- **Só mobile**: só molduras de celular. Recomendado quando o projeto é app mobile-first ou nativo.
+- **Só desktop**: só molduras de navegador; a coluna de notas fica embaixo do frame.
+
+**Onde salvar** — "Onde salvar o protótipo?":
+
+- **Obsidian (Recomendado quando há plano no vault)**: `~/Documents/repositories/obsidian/projects/<Projeto>/prototipos/`,
+  com índice e links nas tasks (passo 4).
+- **Repositório do projeto**: `docs/prototypes/` na raiz do repo (ou a pasta de docs que o projeto já
+  usa). Sem índice no Obsidian; avise que o arquivo entra no git se não for ignorado.
+- **Outra pasta**: o usuário digita o caminho em "Other".
+
+Atualizando um protótipo existente: use o mesmo local e os mesmos dispositivos que ele já tem,
+sem perguntar (só pergunte se o pedido mudar isso).
+
 ## 2. Consulta de UX
 
 Rode 3–5 buscas curtas (uma intenção cada) com o `SEARCH` do preflight:
@@ -62,17 +92,21 @@ Regras:
 
 ## 3. Escrever o HTML
 
-Parta de [`assets/frame-template.html`](assets/frame-template.html) (molduras de celular e desktop,
-tab bar, estrutura "spec": mockup à esquerda, notas à direita). Exemplo completo aprovado:
+Parta de [`assets/frame-template.html`](assets/frame-template.html) (arquivo autônomo, com
+doctype/head; molduras de celular e desktop,
+tab bar, estrutura "spec": mockup à esquerda, notas à direita; com 3+ celulares na seção, as notas
+descem para baixo — não troque esse grid por `auto`, que espreme as notas). Exemplo completo aprovado:
 `~/Documents/repositories/obsidian/projects/Athlos/prototipos/telas-mvp.html`.
 
 - **Tokens**: copie os valores do arquivo de tokens do projeto para o `:root` (claro) e para os dois
   blocos escuros (`@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` e
   `:root[data-theme="dark"]`). Mesma fonte do projeto (Google Fonts) com fallback.
-- **Uma seção por tela/task**: celular 375px com dados de exemplo **coerentes com as regras de
+- **Dispositivos**: siga a escolha do passo 1b. Remova do template o que não for usado (`.desk*` em
+  "só mobile"; `.phone`/tab bar de celular em "só desktop") em vez de deixar CSS morto.
+- **Uma seção por tela/task**: o frame escolhido (celular 375px e/ou desktop) com dados de exemplo **coerentes com as regras de
   negócio** (datas reais, semana certa, limites como janelas de N dias) + notas com:
   tag da task e RNs, título, 1 parágrafo, lista "RN/CA → como a tela atende", "Decisões de UX" e
-  "Em aberto". Inclua uma visão desktop quando a tela muda de layout.
+  "Em aberto". Em "mobile + desktop", inclua a visão desktop quando a tela muda de layout.
 - **Interativo só no que ensina algo**: o check que atualiza o resumo, o seletor que habilita o
   botão. JS pequeno, sem libs.
 - Padrões que sempre valem (se o projeto não disser o contrário): alvo de toque ≥ 44px; estado nunca
@@ -80,31 +114,40 @@ tab bar, estrutura "spec": mockup à esquerda, notas à direita). Exemplo comple
   língua da interface do projeto.
 - Se o projeto tiver uma rule de padrões de UX (ex.: `ux-patterns.md`), ela manda.
 
-## 4. Salvar e linkar no Obsidian
+## 4. Salvar (e linkar, se for Obsidian)
 
-Pasta: `~/Documents/repositories/obsidian/projects/<Projeto>/prototipos/`.
+Em qualquer destino: `<slug>.html` **autônomo** (com `<!doctype html>`, `<html lang>`, `<head>` com
+charset e viewport), para abrir direto no navegador. Depois de salvar, abra com
+`xdg-open <arquivo>` (Linux) / `open` (macOS) em background; se falhar, só informe o caminho.
 
-1. `<slug>.html` **autônomo** (com `<!doctype html>`, `<html lang>`, `<head>` com charset e viewport),
-   para abrir direto no navegador.
-2. `<slug>.md` índice: o que é, link local `[<slug>.html](<slug>.html)`, link publicado, data, e
+Destino **repositório** ou **outra pasta**: só o `.html`. Pare aqui e vá para o passo 6.
+
+Destino **Obsidian** (`~/Documents/repositories/obsidian/projects/<Projeto>/prototipos/`), além do `.html`:
+
+1. `<slug>.md` índice: o que é, link local `[<slug>.html](<slug>.html)`, link publicado (só se
+   houver), data, e
    **um `##` por tela** com a task linkada (`[[../tasks/<arquivo>|<título>]]`) e os bullets de decisão;
    no fim, `## A confirmar` com checkboxes.
-3. Em cada task coberta, adicione no topo de `## Referências`:
+2. Em cada task coberta, adicione no topo de `## Referências`:
    `- [[../prototipos/<slug>#<heading>|Protótipo: <heading>]]` (não duplique se já existir).
-4. Nota raiz do projeto: link para o índice na seção de navegação.
-5. Registre a pasta/decisão na nota do projeto em `_knowledge/projects/` (em inglês).
+3. Nota raiz do projeto: link para o índice na seção de navegação.
+4. Registre a pasta/decisão na nota do projeto em `_knowledge/projects/` (em inglês).
 
 Atualizando um protótipo existente: edite o mesmo `<slug>`, preserve headings já linkados.
 
-## 5. Publicar
+## 5. Publicar (só se pedido)
 
-Salvo pedido de "sem publicar": publique com a ferramenta `Artifact` (carregue as orientações de
-design dela antes, se ainda não estiverem no contexto). Para atualizar, republique o mesmo arquivo
-ou passe a `url` do índice. O arquivo publicado não leva doctype/html/head (o Artifact embrulha);
-gere o `.html` do Obsidian a partir dele com o cabeçalho adicionado.
+Pule este passo, a menos que o usuário tenha pedido explicitamente para publicar. Não ofereça
+publicar a cada execução; no máximo mencione uma vez, no fim, que dá para gerar um link.
+
+Quando pedido: gere uma cópia em `$SCRATCHPAD` sem o invólucro (`<!doctype>`, `<html>`, `<head>`,
+`<body>` — mantenha `<title>`, `<meta name="claude:…">`, `<link>` e `<style>`) e publique essa cópia
+com a ferramenta `Artifact` (carregue as orientações de design dela antes, se ainda não estiverem no
+contexto). Para atualizar, republique o mesmo arquivo ou passe a `url` do índice. Se houver índice no
+Obsidian, adicione o link publicado nele.
 
 ## 6. Entregar
 
-Resposta curta: link, o que cada tela mostra (1 linha), e as **decisões que precisam de ok** antes de
+Resposta curta: caminho do arquivo salvo (e o link, se publicou), o que cada tela mostra (1 linha), e as **decisões que precisam de ok** antes de
 virar código. Ofereça transformar os padrões aprovados em rule do projeto
 (`.claude/rules/ux-patterns.md`) — só crie se o usuário pedir.

@@ -46,5 +46,7 @@ Uso, em qualquer projeto:
 ```
 
 ou só peça "gera o protótipo da tela X". A skill confere o plugin `ui-ux-pro-max` (instala se faltar),
-lê o design system do projeto e o plano no Obsidian, gera o HTML, salva em
-`projects/<Projeto>/prototipos/`, linka nas tasks e publica como Artifact.
+lê o design system do projeto e o plano no Obsidian, pergunta onde salvar (Obsidian em
+`projects/<Projeto>/prototipos/`, `docs/prototypes/` do repo ou outra pasta), gera o HTML autônomo e
+abre no navegador. No Obsidian, também linka nas tasks. Só publica como Artifact se você pedir
+(`/ui-prototype ... publicar`).

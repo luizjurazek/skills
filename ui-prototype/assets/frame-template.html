@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="__LANG__">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>__PROJECT__ Screens</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=__FONT__:wght@400..600&display=swap">
@@ -5,7 +10,8 @@
 /*
  * Starter for ui-prototype. Replace every __TOKEN__ with the project's real values
  * (copy from its tokens file). Layout: one "spec" row per screen — phone(s) left, notes right.
- * For the Obsidian copy, prepend <!doctype html><html lang="pt-BR"><head> with charset + viewport.
+ * Standalone file: opens directly in the browser. Only when publishing as an Artifact, strip
+ * the doctype/html/head/body wrapper (the Artifact adds its own).
  */
 :root {
   --bg: __BG_LIGHT__; --page: __PAGE_LIGHT__; --surface: __SURFACE_LIGHT__; --surface-muted: __SURFACE_MUTED_LIGHT__;
@@ -56,7 +62,10 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .legend a { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); color: var(--text); text-decoration: none; }
 .legend a span { font-family: var(--mono); color: var(--muted); margin-right: 6px; }
 .spec { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; }
-@media (min-width: 900px) { .spec { grid-template-columns: auto minmax(0, 1fr); gap: 56px; } }
+/* Notes keep a readable minimum width; phones wrap instead of squeezing them. */
+@media (min-width: 900px) { .spec { grid-template-columns: minmax(0, auto) minmax(340px, 1fr); gap: 56px; } }
+/* Three or more phones, or a desktop frame in the row: frames take the full row, notes go below. */
+@media (min-width: 900px) { .spec:has(> .phones > .device:nth-child(3)), .spec:has(> .desk-scroll) { grid-template-columns: 1fr; gap: 40px; } }
 .phones { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
 .notes { display: flex; flex-direction: column; gap: 16px; min-width: 0; max-width: 60ch; }
 .notes .tag { font-family: var(--mono); font-size: 12px; color: var(--accent-text); letter-spacing: .04em; }
@@ -97,6 +106,8 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 @media (max-width: 420px) { .phone { height: 720px; border-radius: 40px; margin: 6px; box-shadow: 0 0 0 6px var(--frame), var(--shadow-lg); } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
+</head>
+<body>
 
 <main class="wrap">
   <header class="intro">
@@ -146,3 +157,5 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
     </div>
   </section>
 </main>
+</body>
+</html>
