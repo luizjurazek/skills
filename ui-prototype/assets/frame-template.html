@@ -1,0 +1,148 @@
+<title>__PROJECT__ Screens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=__FONT__:wght@400..600&display=swap">
+<style>
+/*
+ * Starter for ui-prototype. Replace every __TOKEN__ with the project's real values
+ * (copy from its tokens file). Layout: one "spec" row per screen — phone(s) left, notes right.
+ * For the Obsidian copy, prepend <!doctype html><html lang="pt-BR"><head> with charset + viewport.
+ */
+:root {
+  --bg: __BG_LIGHT__; --page: __PAGE_LIGHT__; --surface: __SURFACE_LIGHT__; --surface-muted: __SURFACE_MUTED_LIGHT__;
+  --text: __TEXT_LIGHT__; --muted: __MUTED_LIGHT__; --border: __BORDER_LIGHT__; --border-strong: __BORDER_STRONG_LIGHT__;
+  --material: __MATERIAL_LIGHT__; --fill: __FILL_LIGHT__;
+  --primary: __PRIMARY_LIGHT__; --on-primary: __ON_PRIMARY_LIGHT__;
+  --accent: __ACCENT__; --accent-text: __ACCENT_TEXT_LIGHT__; --accent-bg: __ACCENT_BG__;
+  --success: __SUCCESS_LIGHT__; --warning: __WARNING_LIGHT__; --danger: __DANGER_LIGHT__;
+  --frame: #d2d2d7; --shadow: 0 4px 16px rgba(10,10,10,.08); --shadow-lg: 0 24px 60px rgba(10,10,10,.12);
+  --font: "__FONT__", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: __BG_DARK__; --page: __PAGE_DARK__; --surface: __SURFACE_DARK__; --surface-muted: __SURFACE_MUTED_DARK__;
+    --text: __TEXT_DARK__; --muted: __MUTED_DARK__; --border: __BORDER_DARK__; --border-strong: __BORDER_STRONG_DARK__;
+    --material: __MATERIAL_DARK__; --fill: __FILL_DARK__;
+    --primary: __PRIMARY_DARK__; --on-primary: __ON_PRIMARY_DARK__; --accent-text: __ACCENT_TEXT_DARK__;
+    --success: __SUCCESS_DARK__; --warning: __WARNING_DARK__; --danger: __DANGER_DARK__;
+    --frame: #3a3a3c; --shadow: 0 4px 16px rgba(0,0,0,.4); --shadow-lg: 0 24px 60px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  /* Same values as the media block above, so an explicit dark choice also wins. */
+  --bg: __BG_DARK__; --page: __PAGE_DARK__; --surface: __SURFACE_DARK__; --surface-muted: __SURFACE_MUTED_DARK__;
+  --text: __TEXT_DARK__; --muted: __MUTED_DARK__; --border: __BORDER_DARK__; --border-strong: __BORDER_STRONG_DARK__;
+  --material: __MATERIAL_DARK__; --fill: __FILL_DARK__;
+  --primary: __PRIMARY_DARK__; --on-primary: __ON_PRIMARY_DARK__; --accent-text: __ACCENT_TEXT_DARK__;
+  --success: __SUCCESS_DARK__; --warning: __WARNING_DARK__; --danger: __DANGER_DARK__;
+  --frame: #3a3a3c; --shadow: 0 4px 16px rgba(0,0,0,.4); --shadow-lg: 0 24px 60px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+/* Page chrome */
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 48px 96px; display: flex; flex-direction: column; gap: 72px; }
+.intro { display: flex; flex-direction: column; gap: 12px; max-width: 64ch; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.intro h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.legend a { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); color: var(--text); text-decoration: none; }
+.legend a span { font-family: var(--mono); color: var(--muted); margin-right: 6px; }
+.spec { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; }
+@media (min-width: 900px) { .spec { grid-template-columns: auto minmax(0, 1fr); gap: 56px; } }
+.phones { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
+.notes { display: flex; flex-direction: column; gap: 16px; min-width: 0; max-width: 60ch; }
+.notes .tag { font-family: var(--mono); font-size: 12px; color: var(--accent-text); letter-spacing: .04em; }
+.notes h2 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; text-wrap: balance; }
+.notes > p { margin: 0; color: var(--muted); }
+.notes ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.notes li { display: grid; grid-template-columns: 64px minmax(0,1fr); gap: 12px; font-size: 15px; }
+.notes li b { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); padding-top: 3px; }
+.notes h3 { margin: 8px 0 0; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+
+/* Phone frame (375 x 780) */
+.device { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 0; }
+.device figcaption { font-size: 13px; color: var(--muted); }
+.phone { width: 375px; max-width: 100%; height: 780px; position: relative; overflow: hidden; border-radius: 48px; background: var(--bg); box-shadow: 0 0 0 10px var(--frame), var(--shadow-lg); margin: 10px; display: flex; flex-direction: column; }
+.status { flex-shrink: 0; height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0; font-size: 15px; font-weight: 600; }
+.status .island { width: 110px; height: 30px; border-radius: 999px; background: #000; }
+.screen { flex: 1; overflow-y: auto; padding: 12px 16px 110px; display: flex; flex-direction: column; gap: 24px; scrollbar-width: none; }
+.screen::-webkit-scrollbar { display: none; }
+.homebar { position: absolute; bottom: 7px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 999px; background: var(--text); opacity: .85; z-index: 4; }
+/* Floating bottom tab bar — adapt to the project's real navigation. */
+.tabbar { position: absolute; left: 16px; right: 16px; bottom: 20px; height: 62px; padding: 4px; display: flex; border-radius: 999px; border: 1px solid var(--border); background: var(--material); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); box-shadow: var(--shadow); z-index: 3; }
+.tabbar .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 999px; color: var(--muted); font-size: 11px; font-weight: 500; }
+.tabbar .tab.on { color: var(--text); background: var(--fill); }
+
+/* Desktop frame */
+.desk-scroll { overflow-x: auto; padding: 10px; }
+.desk { width: 1120px; height: 640px; border-radius: 14px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--frame), var(--shadow-lg); display: flex; flex-direction: column; margin: 0 auto; }
+.desk-chrome { height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.desk-chrome i { width: 12px; height: 12px; border-radius: 999px; background: var(--border-strong); }
+
+/* In-app components: copy the project's real ones (lists, cards, pills, forms, sheets). */
+.h-large { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+.sub { color: var(--muted); font-size: 14px; margin: 2px 0 0; }
+.group { list-style: none; margin: 0; padding: 0; border-radius: 16px; background: var(--surface); overflow: hidden; }
+.group > * + * { border-top: 1px solid var(--border); }
+.row { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 12px 8px 16px; }
+
+@media (max-width: 420px) { .phone { height: 720px; border-radius: 40px; margin: 6px; box-shadow: 0 0 0 6px var(--frame), var(--shadow-lg); } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<main class="wrap">
+  <header class="intro">
+    <span class="eyebrow">__PROJECT__ · __SCOPE__ · mockups</span>
+    <h1>__HEADLINE__</h1>
+    <p>__INTRO: what is covered, which tokens, sample-data assumptions (e.g. "today" and week start), what is clickable.__</p>
+    <nav class="legend" aria-label="Telas">
+      <a href="#screen-1"><span>__TASK__</span>__SCREEN__</a>
+    </nav>
+  </header>
+
+  <!-- Repeat one .spec section per screen/task -->
+  <section class="spec" id="screen-1">
+    <div class="phones">
+      <figure class="device">
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="island"></span><span></span></div>
+          <div class="screen">
+            <div><h2 class="h-large">__SCREEN TITLE__</h2><p class="sub">__CONTEXT__</p></div>
+            <ul class="group">
+              <li class="row">__ROW__</li>
+            </ul>
+          </div>
+          <nav class="tabbar" aria-label="Navegação principal">
+            <span class="tab on">__TAB__</span><span class="tab">__TAB__</span>
+          </nav>
+          <span class="homebar"></span>
+        </div>
+        <figcaption>__SCREEN__ · __ROUTE__</figcaption>
+      </figure>
+    </div>
+    <div class="notes">
+      <span class="tag">Task __N__ · __RULES__</span>
+      <h2>__ONE-LINE PURPOSE__</h2>
+      <p>__ONE PARAGRAPH__</p>
+      <ul>
+        <li><b>__RN/CA__</b><span>__how the screen satisfies it__</span></li>
+      </ul>
+      <h3>Decisões de UX</h3>
+      <ul>
+        <li><b>__TOPIC__</b><span>__decision__</span></li>
+      </ul>
+      <h3>Em aberto</h3>
+      <ul>
+        <li><b>__TOPIC__</b><span>__question for the user__</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
