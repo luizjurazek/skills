@@ -20,10 +20,11 @@ cd ~/Documents/personal/skills
 
 | Skill | Para quê | Dependências |
 | --- | --- | --- |
-| `mr-message` | Mensagem curta de MR do Nexus | — |
-| `open-github-pr` | Abrir PR no GitHub | `gh` |
-| `review-nexus-pr` | Review de PR/MR do Nexus | — |
-| `review-pr` | Review de PR | — |
+| `mr-message` | Mensagem curta de MR do Nexus (copia para o clipboard) | `wl-copy` ou `xclip` (opcional) |
+| `open-pr` | Abrir MR no GitLab do Nexus contra `develop`, com descrição da `mr-message` | `glab` autenticado em `git.copasul.coop.br`; skill `mr-message` |
+| `open-github-pr` | Abrir PR(s) no GitHub contra `develop` em um ou vários repos e comentar na tarefa LiveSEO | MCP `user-github` (sem fallback) |
+| `review-nexus-pr` | Review de PR/MR do Nexus (só reporta, não altera arquivos) | `glab` (ou `gh` para GitHub) |
+| `review-pr` | Review de PR do GitHub / MR do GitLab com checklist próprio (`rules.md`) | MCP GitKraken ou `mcp-gitlab`; fallback `gh`/`glab`/git |
 | `sync-resultados` | Sincronizar resultados em planilha | ver `sync-resultados/README.md` |
 | `ui-prototype` | Protótipos de telas (HTML mobile + desktop) a partir do plano no Obsidian | plugin `ui-ux-pro-max`, `python3` |
 | `ui-design-system` | Auditar/estender os tokens e specs de componentes do projeto | plugin `ui-ux-pro-max`, `node` (validador) |
@@ -40,7 +41,7 @@ projeto como fonte da verdade; saídas que não são código vão para `projects
 
 Uso, em qualquer projeto:
 
-```
+```text
 /ui-prototype telas da task 05
 ```
 
